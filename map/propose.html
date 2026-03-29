@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OUPS - Propose</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="logo-oups">
+      <img src="images/gif qui changent/final.gif" alt="OUPS logo">
+    </div>
+    <nav class="main-menu">
+      <ul>
+        <li><a href="index.html"><img src="images/gif qui changent/carte.gif" alt="Carte" class="menu-gif"></a></li>
+        <li><a href="events.html"><img src="images/gif qui changent/artist.gif" alt="Events" class="menu-gif"></a></li>
+        <li><a href="propose.html"><img src="images/gif qui changent/share.gif" alt="Propose" class="menu-gif"></a></li>
+      </ul>
+    </nav>
+  </header>
+  <main class="events-page">
+    <section class="propose-form-section">
+      <h1>Proposer un événement</h1>
+      <form id="propose-form">
+        <input type="text" id="propose-title" name="title" placeholder="Titre" required>
+        <input type="text" id="propose-artist" name="artist" placeholder="Nom d'artiste" required>
+        <input type="date" id="propose-date" name="date" required>
+        <input type="time" id="propose-time" name="time" required>
+        <input type="text" id="propose-place" name="place" placeholder="Lieu" required>
+        <input type="text" id="propose-address" name="address" placeholder="Adresse du lieu" required>
+        <textarea id="propose-description" name="description" placeholder="Description" rows="3" required></textarea>
+        <label for="propose-photo">Photo (optionnel)</label>
+        <input type="file" id="propose-photo" name="photo" accept="image/*">
+        <button type="submit">Envoyer</button>
+      </form>
+    </section>
+  </main>
+  <script>
+    document.getElementById('propose-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const title = document.getElementById('propose-title').value.trim();
+      const artist = document.getElementById('propose-artist').value.trim();
+      const date = document.getElementById('propose-date').value;
+      const time = document.getElementById('propose-time').value;
+      const place = document.getElementById('propose-place').value.trim();
+      const address = document.getElementById('propose-address').value.trim();
+      const description = document.getElementById('propose-description').value.trim();
+      const photoInput = document.getElementById('propose-photo');
+
+      if (!title || !artist || !date || !time || !place || !address || !description) {
+        alert('Complète tous les champs pour proposer un événement.');
+        return;
+      }
+
+      const newEvent = { lat: 50.8503, lng: 4.3517, title, artist, description, date, time, place, address };
+
+      function saveAndRedirect(ev) {
+        const stored = JSON.parse(localStorage.getItem('oups-events-v1') || '[]');
+        stored.push(ev);
+        localStorage.setItem('oups-events-v1', JSON.stringify(stored));
+        alert('Événement proposé avec succès !');
+        window.location.href = 'events.html';
+      }
+
+      if (photoInput.files && photoInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          newEvent.photo = e.target.result;
+          saveAndRedirect(newEvent);
+        };
+        reader.readAsDataURL(photoInput.files[0]);
+      } else {
+        saveAndRedirect(newEvent);
+      }
+    });
+  </script>
+</body>
+</html>

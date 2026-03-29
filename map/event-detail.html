@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OUPS - Événement</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="logo-oups">
+      <img src="images/gif qui changent/final.gif" alt="OUPS logo">
+    </div>
+    <nav class="main-menu">
+      <ul>
+        <li><a href="index.html"><img src="images/gif qui changent/carte.gif" alt="Carte" class="menu-gif"></a></li>
+        <li><a href="events.html"><img src="images/gif qui changent/artist.gif" alt="Events" class="menu-gif"></a></li>
+        <li><a href="propose.html"><img src="images/gif qui changent/share.gif" alt="Propose" class="menu-gif"></a></li>
+      </ul>
+    </nav>
+  </header>
+  <main class="events-page event-detail-page" style="padding-top: 220px;">
+    <div id="event-detail"></div>
+  </main>
+  <script>
+    const stored = JSON.parse(localStorage.getItem('oups-events-v1') || '[]');
+    const params = new URLSearchParams(window.location.search);
+    const idx = parseInt(params.get('id'), 10);
+    const detail = document.getElementById('event-detail');
+
+    if (isNaN(idx) || idx < 0 || idx >= stored.length) {
+      detail.innerHTML = '<p>Événement introuvable.</p>';
+    } else {
+      const ev = stored[idx];
+      let html = '<div class="event-detail-content">';
+
+      // Colonne info à gauche (adresse, lieu, date, heure)
+      html += '<div class="event-detail-side">';
+      html += `<p class="event-meta">${ev.address || ''}</p>`;
+      html += `<p class="event-meta">${ev.place || ''}</p>`;
+      if (ev.date) html += `<p class="event-meta">${ev.date}</p>`;
+      if (ev.time) html += `<p class="event-meta">${ev.time}</p>`;
+      html += '</div>';
+
+      // Photo au centre
+      html += '<div class="event-detail-photo">';
+      if (ev.photo) {
+        html += `<img src="${ev.photo}" alt="Photo de l'événement">`;
+      }
+      html += '</div>';
+
+      // Description à droite
+      html += '<div class="event-detail-info">';
+      html += `<h2>${ev.title}</h2>`;
+      if (ev.artist) html += `<p class="event-detail-artist">${ev.artist}</p>`;
+      html += `<p>${ev.description || ''}</p>`;
+      html += '</div>';
+
+      html += '</div>';
+      detail.innerHTML = html;
+    }
+  </script>
+</body>
+</html>

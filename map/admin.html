@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OUPS - Admin</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="logo-oups">
+      <img src="images/gif qui changent/final.gif" alt="OUPS logo">
+    </div>
+    <nav class="main-menu">
+      <ul>
+        <li><a href="index.html"><img src="images/gif qui changent/carte.gif" alt="Carte" class="menu-gif"></a></li>
+        <li><a href="events.html"><img src="images/gif qui changent/artist.gif" alt="Events" class="menu-gif"></a></li>
+        <li><a href="propose.html"><img src="images/gif qui changent/share.gif" alt="Propose" class="menu-gif"></a></li>
+      </ul>
+    </nav>
+  </header>
+  <main class="events-page admin-page">
+    <h1>Admin - Gérer les événements</h1>
+    <div id="admin-list"></div>
+  </main>
+  <script>
+    const storageKey = 'oups-events-v1';
+    const adminList = document.getElementById('admin-list');
+
+    function loadEvents() {
+      return JSON.parse(localStorage.getItem(storageKey) || '[]');
+    }
+
+    function saveEvents(events) {
+      localStorage.setItem(storageKey, JSON.stringify(events));
+    }
+
+    function render() {
+      const events = loadEvents();
+      if (!events.length) {
+        adminList.innerHTML = '<p>Aucun événement.</p>';
+        return;
+      }
+      adminList.innerHTML = events.map((ev, i) => `
+        <div class="admin-card" id="card-${i}">
+          <div class="admin-card-header">
+            <span class="admin-title">${ev.title}</span>
+            <span class="admin-artist">${ev.artist || ''}</span>
+          </div>
+          <div class="admin-card-details">
+            <p>${ev.place || ''} — ${ev.address || ''}</p>
+            <p>${ev.date || ''} ${ev.time || ''}</p>
+            <p>${ev.description || ''}</p>
+          </div>
+          <div class="admin-actions">
+            <button onclick="editEvent(${i})">Modifier</button>
+            <button class="admin-delete" onclick="deleteEvent(${i})">Supprimer</button>
+          </div>
+          <div class="admin-edit-form" id="edit-${i}" style="display:none;">
+            <input type="text" id="edit-title-${i}" value="${(ev.title || '').replace(/"/g, '&quot;')}" placeholder="Titre">
+            <input type="text" id="edit-artist-${i}" value="${(ev.artist || '').replace(/"/g, '&quot;')}" placeholder="Nom d'artiste">
+            <input type="date" id="edit-date-${i}" value="${ev.date || ''}">
+            <input type="time" id="edit-time-${i}" value="${ev.time || ''}">
+            <input type="text" id="edit-place-${i}" value="${(ev.place || '').replace(/"/g, '&quot;')}" placeholder="Lieu">
+            <input type="text" id="edit-address-${i}" value="${(ev.address || '').replace(/"/g, '&quot;')}" placeholder="Adresse">
+            <textarea id="edit-desc-${i}" rows="3" placeholder="Description">${ev.description || ''}</textarea>
+            <button onclick="saveEdit(${i})">Sauvegarder</button>
+            <button onclick="cancelEdit(${i})">Annuler</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function deleteEvent(i) {
+      if (!confirm('Supprimer cet événement ?')) return;
+      const events = loadEvents();
+      events.splice(i, 1);
+      saveEvents(events);
+      render();
+    }
+
+    function editEvent(i) {
+      document.getElementById('edit-' + i).style.display = 'block';
+    }
+
+    function cancelEdit(i) {
+      document.getElementById('edit-' + i).style.display = 'none';
+    }
+
+    function saveEdit(i) {
+      const events = loadEvents();
+      events[i].title = document.getElementById('edit-title-' + i).value.trim();
+      events[i].artist = document.getElementById('edit-artist-' + i).value.trim();
+      events[i].date = document.getElementById('edit-date-' + i).value;
+      events[i].time = document.getElementById('edit-time-' + i).value;
+      events[i].place = document.getElementById('edit-place-' + i).value.trim();
+      events[i].address = document.getElementById('edit-address-' + i).value.trim();
+      events[i].description = document.getElementById('edit-desc-' + i).value.trim();
+      saveEvents(events);
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>
