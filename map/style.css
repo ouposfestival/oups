@@ -1,16 +1,70 @@
-.container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 15px;
+.header {
+    background-color: #333;
+    padding: 1em;
+    text-align: center;
 }
 
-/* Existing styles... */
+.header h1 {
+    font-size: 2.5em;
+    color: white;
+}
 
-/* Mobile Styles */
+.menu {
+    display: flex;
+    justify-content: center;
+    padding: 0.5em;
+}
+
+.menu a {
+    color: white;
+    padding: 1em;
+    text-decoration: none;
+}
+
+.map {
+    width: 100%;
+    height: auto;
+}
+
+.event-panel {
+    border: 1px solid #ccc;
+    padding: 1em;
+    margin: 1em;
+}
+
 @media (max-width: 768px) {
-  .container {
-    padding: 0 10px;
-  }
-  /* Add additional mobile styles below this line */
+    .header h1 {
+        font-size: 2em;
+    }
+    .logo {
+        width: 80%;
+    }
+    .menu {
+        flex-direction: column;
+    }
+    .event-panel {
+        margin: 0.5em;
+    }
+}
+
+@media (max-width: 480px) {
+    .header h1 {
+        font-size: 1.5em;
+    }
+    .logo {
+        width: 60%;
+    }
+    .menu {
+        padding: 0.2em;
+    }
+    .event-panel {
+        padding: 0.5em;
+    }
+}
+
+@font-face {
+    font-family: 'CustomFont';
+    src: url('fonts/customfont.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
 }
