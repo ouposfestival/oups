@@ -14,10 +14,7 @@ function saveEvents() {
 }
 
 const savedEvents = loadEvents();
-const events = savedEvents.length ? savedEvents : [
-  { lat: 50.8466, lng: 4.3528, title: 'Exposition Place Royale', description: 'Installation artistique sur la Place Royale.', date:'', time:'', place:'Place Royale', address:'1000 Bruxelles' },
-  { lat: 50.8505, lng: 4.3488, title: 'Performance Grand Place', description: 'Performance live sur la Grand Place.', date:'', time:'', place:'Grand Place', address:'1000 Bruxelles' }
-];
+const events = savedEvents;
 
 const map = L.map('map').setView([50.8503, 4.3517], 13);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
