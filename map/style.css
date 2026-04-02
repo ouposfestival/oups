@@ -259,8 +259,8 @@ main {
   cursor: pointer;
 }
 .info-control img {
-  height: 40px;
-  filter: invert(1);
+  height: 120px;
+  filter: none;
 }
 
 /* Style de la scrollbar pour la description */
