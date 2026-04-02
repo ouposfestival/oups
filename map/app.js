@@ -1,20 +1,23 @@
-const storageKey = 'oups-events-v1';
+let events = [];
+let markers = [];
 
-function loadEvents() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
-    return Array.isArray(saved) ? saved : [];
-  } catch (err) {
-    return [];
-  }
+async function initApp() {
+  events = await loadEventsFromDB();
+  renderMarkers();
 }
 
-function saveEvents() {
-  localStorage.setItem(storageKey, JSON.stringify(events));
+function clearMarkers() {
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
 }
 
-const savedEvents = loadEvents();
-const events = savedEvents;
+function renderMarkers() {
+  clearMarkers();
+  events.forEach(ev => {
+    const m = addMarker(ev);
+    markers.push(m);
+  });
+}
 
 const map = L.map('map').setView([50.8503, 4.3517], 13);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -106,13 +109,11 @@ function addMarker(ev) {
     L.DomEvent.stopPropagation(e);
     showEventInfo(ev);
   });
+  return marker;
 }
 
-function renderMarkers() {
-  events.forEach(addMarker);
-}
-
-renderMarkers();
+// Lancer le chargement des événements
+initApp();
 
 const panel = document.getElementById('event-panel');
 const eventForm = document.getElementById('event-form');
@@ -160,7 +161,7 @@ map.on('click', function(e) {
   openForm(e.latlng);
 });
 
-eventForm.addEventListener('submit', function(e) {
+eventForm.addEventListener('submit', async function(e) {
   e.preventDefault();
   if (!currentLatLng) return;
   const title = document.getElementById('title').value.trim();
@@ -188,23 +189,25 @@ eventForm.addEventListener('submit', function(e) {
     address
   };
 
+  async function saveAndShow(ev) {
+    const docId = await addEventToDB(ev);
+    ev.id = docId;
+    events.push(ev);
+    const m = addMarker(ev);
+    markers.push(m);
+    showEventInfo(ev);
+    closeForm();
+  }
+
   if (photoInput.files && photoInput.files[0]) {
     const file = photoInput.files[0];
     const reader = new FileReader();
-    reader.onload = function(e) {
-      newEvent.photo = e.target.result; // base64 string
-      events.push(newEvent);
-      saveEvents();
-      addMarker(newEvent);
-      showEventInfo(newEvent);
-      closeForm();
+    reader.onload = async function(e) {
+      newEvent.photo = e.target.result;
+      await saveAndShow(newEvent);
     };
     reader.readAsDataURL(file);
   } else {
-    events.push(newEvent);
-    saveEvents();
-    addMarker(newEvent);
-    showEventInfo(newEvent);
-    closeForm();
+    await saveAndShow(newEvent);
   }
 });

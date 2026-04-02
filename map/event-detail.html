@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OUPS - Événement</title>
+  <title>💋OUPS Festival 9-11</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -22,43 +22,54 @@
   <main class="events-page event-detail-page" style="padding-top: 220px;">
     <div id="event-detail"></div>
   </main>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
   <script>
-    const stored = JSON.parse(localStorage.getItem('oups-events-v1') || '[]');
     const params = new URLSearchParams(window.location.search);
-    const idx = parseInt(params.get('id'), 10);
+    const docId = params.get('id');
     const detail = document.getElementById('event-detail');
 
-    if (isNaN(idx) || idx < 0 || idx >= stored.length) {
-      detail.innerHTML = '<p>Événement introuvable.</p>';
-    } else {
-      const ev = stored[idx];
-      let html = '<div class="event-detail-content">';
-
-      // Colonne info à gauche (adresse, lieu, date, heure)
-      html += '<div class="event-detail-side">';
-      html += `<p class="event-meta">${ev.address || ''}</p>`;
-      html += `<p class="event-meta">${ev.place || ''}</p>`;
-      if (ev.date) html += `<p class="event-meta">${ev.date}</p>`;
-      if (ev.time) html += `<p class="event-meta">${ev.time}</p>`;
-      html += '</div>';
-
-      // Photo au centre
-      html += '<div class="event-detail-photo">';
-      if (ev.photo) {
-        html += `<img src="${ev.photo}" alt="Photo de l'événement">`;
+    async function loadDetail() {
+      if (!docId) {
+        detail.innerHTML = '<p>Événement introuvable.</p>';
+        return;
       }
-      html += '</div>';
+      try {
+        const doc = await db.collection('events').doc(docId).get();
+        if (!doc.exists) {
+          detail.innerHTML = '<p>Événement introuvable.</p>';
+          return;
+        }
+        const ev = doc.data();
+        let html = '<div class="event-detail-content">';
 
-      // Description à droite
-      html += '<div class="event-detail-info">';
-      html += `<h2>${ev.title}</h2>`;
-      if (ev.artist) html += `<p class="event-detail-artist">${ev.artist}</p>`;
-      html += `<p>${ev.description || ''}</p>`;
-      html += '</div>';
+        html += '<div class="event-detail-side">';
+        html += `<p class="event-meta">${ev.address || ''}</p>`;
+        html += `<p class="event-meta">${ev.place || ''}</p>`;
+        if (ev.date) html += `<p class="event-meta">${ev.date}</p>`;
+        if (ev.time) html += `<p class="event-meta">${ev.time}</p>`;
+        html += '</div>';
 
-      html += '</div>';
-      detail.innerHTML = html;
+        html += '<div class="event-detail-photo">';
+        if (ev.photo) {
+          html += `<img src="${ev.photo}" alt="Photo de l'événement">`;
+        }
+        html += '</div>';
+
+        html += '<div class="event-detail-info">';
+        html += `<h2>${ev.title}</h2>`;
+        if (ev.artist) html += `<p class="event-detail-artist">${ev.artist}</p>`;
+        html += `<p>${ev.description || ''}</p>`;
+        html += '</div>';
+
+        html += '</div>';
+        detail.innerHTML = html;
+      } catch (err) {
+        detail.innerHTML = '<p>Erreur de chargement.</p>';
+      }
     }
+    loadDetail();
   </script>
 </body>
 </html>

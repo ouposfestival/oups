@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>💋OUPS Festival 6-8</title>
+  <title>💋OUPS Festival 9-11</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -36,8 +36,11 @@
       </form>
     </section>
   </main>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
   <script>
-    document.getElementById('propose-form').addEventListener('submit', function(e) {
+    document.getElementById('propose-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       const title = document.getElementById('propose-title').value.trim();
       const artist = document.getElementById('propose-artist').value.trim();
@@ -54,9 +57,9 @@
       }
 
       // Cœur paramétrique autour de Bruxelles
-      const stored2 = JSON.parse(localStorage.getItem('oups-events-v1') || '[]');
-      const n = stored2.length;
-      const t = (n / 40) * 2 * Math.PI; // 40 points pour un cœur complet
+      const allEvents = await loadEventsFromDB();
+      const n = allEvents.length;
+      const t = (n / 40) * 2 * Math.PI;
       const scale = 0.006;
       const heartX = 16 * Math.pow(Math.sin(t), 3);
       const heartY = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
@@ -64,23 +67,21 @@
       const offsetLng = heartX / 16 * scale;
       const newEvent = { lat: 50.8503 + offsetLat, lng: 4.3517 + offsetLng, title, artist, description, date, time, place, address };
 
-      function saveAndRedirect(ev) {
-        const stored = JSON.parse(localStorage.getItem('oups-events-v1') || '[]');
-        stored.push(ev);
-        localStorage.setItem('oups-events-v1', JSON.stringify(stored));
+      async function saveAndRedirect(ev) {
+        await addEventToDB(ev);
         alert('Événement proposé avec succès !');
         window.location.href = 'events.html';
       }
 
       if (photoInput.files && photoInput.files[0]) {
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = async function(e) {
           newEvent.photo = e.target.result;
-          saveAndRedirect(newEvent);
+          await saveAndRedirect(newEvent);
         };
         reader.readAsDataURL(photoInput.files[0]);
       } else {
-        saveAndRedirect(newEvent);
+        await saveAndRedirect(newEvent);
       }
     });
   </script>
