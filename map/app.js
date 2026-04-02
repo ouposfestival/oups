@@ -96,10 +96,28 @@ function showEventInfo(event) {
   });
 }
 
+// Couleurs par date (09 avril 2026 = violet de base)
+const dateColorMap = {};
+const dateColors = [
+  '#b800ff', '#ff2244', '#00bfff', '#ff8800', '#00cc66',
+  '#ff44aa', '#aacc00', '#ff5555', '#22dddd', '#ffcc00',
+  '#8844ff', '#44ff88', '#ff6600', '#0088ff', '#cc00cc'
+];
+function getColorForDate(dateStr) {
+  if (!dateStr) return '#b800ff';
+  if (dateStr === '2026-04-09') return '#b800ff';
+  if (dateColorMap[dateStr]) return dateColorMap[dateStr];
+  // Index 0 is reserved for 2026-04-09
+  const usedCount = Object.keys(dateColorMap).length;
+  dateColorMap[dateStr] = dateColors[(usedCount + 1) % dateColors.length];
+  return dateColorMap[dateStr];
+}
+
 function addMarker(ev) {
+  const color = getColorForDate(ev.date);
   const arrowIcon = L.divIcon({
     className: 'arrow-marker-wrapper',
-    html: '<div class="arrow-marker"><div class="pin-head"></div></div>',
+    html: `<div class="arrow-marker" style="--marker-color:${color}"><div class="pin-head"></div></div>`,
     iconSize: [24, 34],
     iconAnchor: [12, 34],
     popupAnchor: [0, -34]
