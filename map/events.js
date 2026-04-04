@@ -15,7 +15,7 @@ async function renderEvents() {
     const parts = [];
     if (event.artist) parts.push(`<span class="artist-name">${event.artist}</span>`);
     if (event.place) parts.push(event.place);
-    if (event.address) parts.push(event.address);
+    if (event.address) parts.push(`<a class="address" href="map/index.html?eventId=${event.id}">${event.address}</a>`);
     if (event.time) parts.push(event.time);
     const info = parts.length ? ', ' + parts.join(', ') : '';
     return `<p class="event-line"><a href="event-detail.html?id=${event.id}">${event.title}</a>${info}</p>`;
