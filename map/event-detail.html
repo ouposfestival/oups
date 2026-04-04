@@ -45,10 +45,12 @@
         let html = '<div class="event-detail-content">';
 
         html += '<div class="event-detail-side">';
+        html += '<a href="map/index.html?eventId=${event.id}">';
         html += `<p class="event-meta">${ev.address || ''}</p>`;
         html += `<p class="event-meta">${ev.place || ''}</p>`;
         if (ev.date) html += `<p class="event-meta">${ev.date}</p>`;
         if (ev.time) html += `<p class="event-meta">${ev.time}</p>`;
+        html += '</a>';
         html += '</div>';
 
         html += '<div class="event-detail-photo">';
