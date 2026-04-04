@@ -35,17 +35,6 @@ a:hover {
   cursor: url('images/dolphinLINK.png') 16 16, pointer; /* hover over links */
 }
 
-/* Optional: transparent purple text selection */
-::selection {
-  background-color: rgba(180, 0, 255, 0.7);
-  color: #ffffff;
-}
-
-::-moz-selection {
-  background-color: rgba(180, 0, 255, 0.7);
-  color: #ffffff;
-}
-
 header {
   position: fixed;
   top: 0;
