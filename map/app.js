@@ -4,6 +4,18 @@ let markers = [];
 async function initApp() {
   events = await loadEventsFromDB();
   renderMarkers();
+
+  // zoom to event, if selected via URL
+  const params = new URLSearchParams(window.location.search);
+  const idParam = params.get('eventId');
+  if (idParam) {
+    const match = events.find(ev => ev.id === idParam);
+    if (match) {
+      map.setView([match.lat, match.lng], 16);
+      showEventInfo(match);
+    }
+  }
+  
 }
 
 function clearMarkers() {
