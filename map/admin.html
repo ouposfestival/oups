@@ -20,12 +20,34 @@
     </nav>
   </header>
   <main class="events-page admin-page">
-    <h1>Admin - Gérer les événements</h1>
-    <div id="admin-list"></div>
+    <div id="password-gate">
+      <h1>Admin</h1>
+      <input type="password" id="admin-pw" placeholder="Mot de passe" style="padding:0.5em; font-size:1em; border-radius:6px; border:1px solid #555; background:#222; color:#fff;">
+      <button id="admin-pw-btn" style="padding:0.5em 1em; background:#b800ff; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:1em; margin-left:0.5em;">Entrer</button>
+      <p id="pw-error" style="color:#ff2244; display:none;">Mot de passe incorrect.</p>
+    </div>
+    <div id="admin-content" style="display:none;">
+      <h1>Admin - Gérer les événements</h1>
+      <div id="admin-list"></div>
+    </div>
   </main>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js"></script>
+  <script>
+    const ADMIN_PW_HASH = '5f4dcc3b5aa765d61d8327deb882cf99'; // not used, simple check
+    document.getElementById('admin-pw-btn').addEventListener('click', checkPw);
+    document.getElementById('admin-pw').addEventListener('keydown', function(e) { if (e.key === 'Enter') checkPw(); });
+    function checkPw() {
+      if (document.getElementById('admin-pw').value === 'oupscutey') {
+        document.getElementById('password-gate').style.display = 'none';
+        document.getElementById('admin-content').style.display = 'block';
+        render();
+      } else {
+        document.getElementById('pw-error').style.display = 'block';
+      }
+    }
+  </script>
   <script>
     const adminList = document.getElementById('admin-list');
     let allEvents = [];
@@ -94,7 +116,6 @@
       render();
     }
 
-    render();
   </script>
 </body>
 </html>
