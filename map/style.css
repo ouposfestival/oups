@@ -238,6 +238,18 @@ main {
   cursor: pointer;
 }
 
+.see-more-link {
+  display: inline-block;
+  margin-top: 0.8em;
+  color: #aaa;
+  font-size: 0.85em;
+  text-decoration: none;
+}
+.see-more-link:hover {
+  color: #b800ff;
+  text-decoration: underline;
+}
+
 .contact-info {
   position: fixed;
   left: 1em;
@@ -310,16 +322,16 @@ main {
 
 /* Page Events */
 .events-page {
-  padding-left: 15%;
+  padding-left: 20%;
   padding-right: 2em;
   padding-top: 200px;
 }
 
 .events-instruction {
-  color: #aaa;
-  font-size: 1em;
+  color: #b800ff;
+  font-size: 1.8em;
   margin-bottom: 1em;
-  font-style: italic;
+  font-weight: bold;
 }
 
 .event-line {

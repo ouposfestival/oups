@@ -100,12 +100,18 @@ function showEventInfo(event) {
   if (event.contact) {
     html += `<p>Contact : ${event.contact}</p>`;
   }
+  if (event.duree) {
+    html += `<p>Durée : ${event.duree}</p>`;
+  }
   if (event.photo) {
     if (event.photo.startsWith('data:video/')) {
       html += `<video src="${event.photo}" controls style="max-width: 100%; margin-top: 10px;"></video>`;
     } else {
       html += `<img src="${event.photo}" alt="Photo de l'événement" style="max-width: 100%; height: auto; margin-top: 10px;">`;
     }
+  }
+  if (event.id) {
+    html += `<a href="event-detail.html?id=${event.id}" class="see-more-link">see more info !</a>`;
   }
   const info = document.getElementById('event-info');
   info.innerHTML = html;
@@ -173,6 +179,7 @@ function openForm(latlng) {
   document.getElementById('place').value = '';
   document.getElementById('address').value = '';
   document.getElementById('contact').value = '';
+  document.getElementById('duree').value = '';
   document.getElementById('description').value = '';
   document.getElementById('photo').value = '';
 }
@@ -212,6 +219,7 @@ eventForm.addEventListener('submit', async function(e) {
   const place = document.getElementById('place').value.trim();
   const address = document.getElementById('address').value.trim();
   const contact = document.getElementById('contact').value.trim();
+  const duree = document.getElementById('duree').value.trim();
   const photoInput = document.getElementById('photo');
   if (!title) {
     alert('Le titre est obligatoire.');
@@ -229,7 +237,8 @@ eventForm.addEventListener('submit', async function(e) {
     dateEnd,
     place,
     address,
-    contact
+    contact,
+    duree
   };
 
   async function saveAndShow(ev) {
