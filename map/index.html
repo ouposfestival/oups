@@ -31,9 +31,12 @@
         <label>Coords <span id="coords"></span></label>
         <input type="text" id="title" name="title" placeholder="Titre" required>
         <input type="text" id="artist" name="artist" placeholder="Nom d'artiste">
-        <input type="date" id="date" name="date">
+        <div class="date-row">
+          <input type="date" id="date" name="date">
+          <span class="date-separator">à<br><small>(if necessary !)</small></span>
+          <input type="date" id="date-end" name="date-end">
+        </div>
         <input type="time" id="time" name="time">
-        <input type="date" id="date-end" name="date-end" placeholder="Date de fin">
         <input type="text" id="place" name="place" placeholder="Lieu">
         <input type="text" id="address" name="address" placeholder="Adresse du lieu">
         <input type="text" id="contact" name="contact" placeholder="Contact">
