@@ -53,7 +53,7 @@ infoControl.onAdd = function(map) {
     } else {
       creditsPopup = L.popup()
         .setLatLng(map.getCenter())
-        .setContent("<div style='text-align:center;'>to share your intervention, click on the map where your artwork is and share how much information you like<br><br>website made by <b><em>Toni!</em></b></div>")
+        .setContent("<div style='text-align:center;'>Want to share your intervention? Click on the map where your artwork is located and tell us about it- Happy to see your contribution!<br><br><small><em>OUPS! Festival is not responsible for submitted interventions.</em></small><br><br>website made by <em>toni</em></div>")
         .openOn(map);
       creditsVisible = true;
     }
