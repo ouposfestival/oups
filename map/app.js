@@ -1,9 +1,28 @@
 let events = [];
 let markers = [];
+let activeMarker = null; // for styling the active (i.e. selected) marker differently
 
 async function initApp() {
   events = await loadEventsFromDB();
   renderMarkers();
+
+  // zoom to event, if selected via URL
+  const params = new URLSearchParams(window.location.search);
+  const idParam = params.get('eventId');
+  if (idParam) {
+    const match = events.find(ev => ev.id === idParam);
+    if (match) {
+      // find marker and activate it
+      const idx = events.indexOf(match);
+      if (markers[idx]) {
+        markers[idx].getElement().querySelector('.arrow-marker').classList.add('active');
+        activeMarker = markers[idx];
+      }
+    map.setView([match.lat, match.lng], 16);
+    showEventInfo(match);
+    }
+  }
+
 }
 
 function clearMarkers() {
@@ -117,6 +136,11 @@ function showEventInfo(event) {
   info.innerHTML = html;
   info.style.display = 'block';
   document.getElementById('close-info').addEventListener('click', function() {
+    // reset active marker on closing of popup
+    if (activeMarker) {
+      activeMarker.getElement().querySelector('.arrow-marker').classList.remove('active');
+      activeMarker = null;
+    }
     info.style.display = 'none';
   });
 }
@@ -150,6 +174,15 @@ function addMarker(ev) {
   const marker = L.marker([ev.lat, ev.lng], { icon: arrowIcon }).addTo(map);
   marker.on('click', function(e) {
     L.DomEvent.stopPropagation(e);
+
+    // reset previously selected active marker
+    if (activeMarker) {
+      activeMarker.getElement().querySelector('.arrow-marker').classList.remove('active');
+    }
+    // mark newly selected marker as active
+    marker.getElement().querySelector('.arrow-marker').classList.add('active');
+    activeMarker = marker;
+
     showEventInfo(ev);
   });
   return marker;
@@ -166,6 +199,11 @@ const eventInfo = document.getElementById('event-info');
 let currentLatLng = null;
 
 function openForm(latlng) {
+  // reset active marker
+  if (activeMarker) {
+    activeMarker.getElement().querySelector('.arrow-marker').classList.remove('active');
+    activeMarker = null;
+  }
   panel.style.display = 'block';
   panel.classList.remove('hidden');
   eventInfo.style.display = 'none';
