@@ -14,7 +14,7 @@ async function renderEvents() {
   let html = events.map((event) => {
     const parts = [];
     if (event.artist) parts.push(`<span class="artist-name">${event.artist}</span>`);
-    if (event.place) parts.push(`<a href="index.html?eventId=${event.id}">${event.place}</a>`);
+    if (event.place) parts.push(`<span class="place-link"><a href="index.html?eventId=${event.id}">${event.place}</a></span>`);
     if (event.time) parts.push(event.time);
     const info = parts.length ? ', ' + parts.join(', ') : '';
     return `<p class="event-line"><a href="event-detail.html?id=${event.id}">${event.title}</a>${info}</p>`;
