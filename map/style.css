@@ -358,6 +358,17 @@ main {
   font-weight: bold;
 }
 
+/* link on artists list page, pointing to map marker */
+.event-line .place-link a {
+  color: #ffffff;
+  text-decoration: none;
+  cursor: pointer;
+}
+.event-line .place-link a:hover {
+  color: #b800ff;
+  text-decoration: underline;
+}
+
 .coming-soon {
   color: #b800ff;
   margin-top: 0.5em;
@@ -495,6 +506,14 @@ main {
   flex-shrink: 0;
   text-align: right;
 }
+.event-detail-page .event-detail-side a {
+  text-decoration: none;
+  cursor: pointer;
+}
+.event-detail-page .event-detail-side a:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
 
 .event-detail-page .event-detail-info {
   flex: 1;
@@ -532,6 +551,24 @@ main {
   font-size: 1.25em;
   margin: 0.1em 0;
 }
+
+/* pulsating ring and enlargend pin */
+.arrow-marker.active {
+  transform: scale(1.4);
+  filter: drop-shadow(0 0 6px var(--marker-color));
+  z-index: 1000 !important;
+}
+
+.arrow-marker.active .pin-head {
+  animation: pulse 5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--marker-color); }
+  50%       { box-shadow: 0 0 0 8px transparent; }
+}
+
+
 
 /* ===== MOBILE ===== */
 @media (max-width: 768px) {
