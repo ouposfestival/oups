@@ -39,6 +39,9 @@ var infoControl = L.control({position: 'bottomleft'});
 infoControl.onAdd = function(map) {
   var div = L.DomUtil.create('div', 'info-control');
   div.innerHTML = '<img src="images/gif qui changent/How-does-it-work-1.gif" alt="Info" style="cursor:pointer;">';
+  var infoImg = div.querySelector('img');
+  infoImg.addEventListener('mouseenter', function() { infoImg.src = 'images/gif qui changent/How-does-it-work-2.gif'; });
+  infoImg.addEventListener('mouseleave', function() { infoImg.src = 'images/gif qui changent/How-does-it-work-1.gif'; });
   L.DomEvent.on(div, 'click', function(e) {
     L.DomEvent.stopPropagation(e);
     if (creditsVisible) {
@@ -81,12 +84,34 @@ function showEventInfo(event) {
   if (event.artist) {
     html += `<p>${event.artist}</p>`;
   }
-  if (event.date && event.time) {
-    html += `<p><b>${formatDate(event.date)}</b> ${event.time}</p>`;
+  if (event.date) {
+    html += `<p><b>${formatDate(event.date)}</b>`;
+    if (event.time) html += ` ${event.time}`;
+    if (event.dateEnd) html += ` → ${formatDate(event.dateEnd)}`;
+    html += `</p>`;
   }
-  html += `<p><b>${event.place}</b> - ${event.address}</p>`;
+  if (event.place || event.address) {
+    html += `<p>`;
+    if (event.place) html += `<b>${event.place}</b>`;
+    if (event.place && event.address) html += ` - `;
+    if (event.address) html += event.address;
+    html += `</p>`;
+  }
+  if (event.contact) {
+    html += `<p>Contact : ${event.contact}</p>`;
+  }
+  if (event.duree) {
+    html += `<p>Durée : ${event.duree}</p>`;
+  }
   if (event.photo) {
-    html += `<img src="${event.photo}" alt="Photo de l'événement" style="max-width: 100%; height: auto; margin-top: 10px;">`;
+    if (event.photo.startsWith('data:video/')) {
+      html += `<video src="${event.photo}" controls style="max-width: 100%; margin-top: 10px;"></video>`;
+    } else {
+      html += `<img src="${event.photo}" alt="Photo de l'événement" style="max-width: 100%; height: auto; margin-top: 10px;">`;
+    }
+  }
+  if (event.id) {
+    html += `<a href="event-detail.html?id=${event.id}" class="see-more-link">see more info !</a>`;
   }
   const info = document.getElementById('event-info');
   info.innerHTML = html;
@@ -150,8 +175,11 @@ function openForm(latlng) {
   document.getElementById('artist').value = '';
   document.getElementById('date').value = '';
   document.getElementById('time').value = '';
+  document.getElementById('date-end').value = '';
   document.getElementById('place').value = '';
   document.getElementById('address').value = '';
+  document.getElementById('contact').value = '';
+  document.getElementById('duree').value = '';
   document.getElementById('description').value = '';
   document.getElementById('photo').value = '';
 }
@@ -187,11 +215,14 @@ eventForm.addEventListener('submit', async function(e) {
   const description = document.getElementById('description').value.trim();
   const date = document.getElementById('date').value;
   const time = document.getElementById('time').value;
+  const dateEnd = document.getElementById('date-end').value;
   const place = document.getElementById('place').value.trim();
   const address = document.getElementById('address').value.trim();
+  const contact = document.getElementById('contact').value.trim();
+  const duree = document.getElementById('duree').value.trim();
   const photoInput = document.getElementById('photo');
-  if (!title || !artist || !description || !date || !time || !place || !address) {
-    alert('Complète tous les champs pour ajouter un événement.');
+  if (!title) {
+    alert('Le titre est obligatoire.');
     return;
   }
 
@@ -203,8 +234,11 @@ eventForm.addEventListener('submit', async function(e) {
     description,
     date,
     time,
+    dateEnd,
     place,
-    address
+    address,
+    contact,
+    duree
   };
 
   async function saveAndShow(ev) {
@@ -218,9 +252,20 @@ eventForm.addEventListener('submit', async function(e) {
   }
 
   if (photoInput.files && photoInput.files[0]) {
-    const compressed = await compressImage(photoInput.files[0]);
-    newEvent.photo = compressed;
-    await saveAndShow(newEvent);
+    const file = photoInput.files[0];
+    if (file.type.startsWith('video/')) {
+      // Video: read as data URL directly (no compression)
+      const reader = new FileReader();
+      reader.onload = async function(ev) {
+        newEvent.photo = ev.target.result;
+        await saveAndShow(newEvent);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      const compressed = await compressImage(file);
+      newEvent.photo = compressed;
+      await saveAndShow(newEvent);
+    }
   } else {
     await saveAndShow(newEvent);
   }

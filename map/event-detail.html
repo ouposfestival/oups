@@ -48,12 +48,18 @@
         html += `<p class="event-meta">${ev.address || ''}</p>`;
         html += `<p class="event-meta">${ev.place || ''}</p>`;
         if (ev.date) html += `<p class="event-meta">${ev.date}</p>`;
+        if (ev.dateEnd) html += `<p class="event-meta">→ ${ev.dateEnd}</p>`;
         if (ev.time) html += `<p class="event-meta">${ev.time}</p>`;
+        if (ev.contact) html += `<p class="event-meta">Contact : ${ev.contact}</p>`;
         html += '</div>';
 
         html += '<div class="event-detail-photo">';
         if (ev.photo) {
-          html += `<img src="${ev.photo}" alt="Photo de l'événement">`;
+          if (ev.photo.startsWith('data:video/')) {
+            html += `<video src="${ev.photo}" controls style="max-width:100%;"></video>`;
+          } else {
+            html += `<img src="${ev.photo}" alt="Photo de l'événement">`;
+          }
         }
         html += '</div>';
 
