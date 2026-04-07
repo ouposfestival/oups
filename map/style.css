@@ -606,6 +606,7 @@ main {
     top: 90px;
     width: auto;
     max-height: calc(100vh - 100px);
+    overflow-y: auto;
   }
 
   /* Event creation panel */
@@ -614,6 +615,8 @@ main {
     left: 0.5em;
     top: 90px;
     width: auto;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
   }
 
   /* Events list page */
