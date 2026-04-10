@@ -5,8 +5,124 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OUPS - Admin</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
    <!-- Favicon -->
   <link rel="icon" type="image/png" href="images/LogO.png">
+  <style>
+    .admin-photo-section {
+      margin: 0.8em 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 1em;
+    }
+    .admin-photo-preview {
+      max-width: 180px;
+      max-height: 130px;
+      border-radius: 6px;
+      object-fit: cover;
+      border: 1px solid #333;
+    }
+    .admin-no-photo {
+      width: 180px;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #1a1a1a;
+      border: 1px dashed #444;
+      border-radius: 6px;
+      color: #555;
+      font-style: italic;
+      font-size: 0.85em;
+    }
+    .admin-photo-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4em;
+    }
+    .admin-photo-controls button {
+      padding: 0.4em 0.8em;
+      border: none;
+      border-radius: 6px;
+      background: #333;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.85em;
+      font-family: inherit;
+      text-align: left;
+      white-space: nowrap;
+    }
+    .admin-photo-controls button:hover {
+      background: #b800ff;
+    }
+    .admin-photo-controls .photo-delete {
+      background: #441111;
+      color: #ff6677;
+    }
+    .admin-photo-controls .photo-delete:hover {
+      background: #ff2244;
+      color: #fff;
+    }
+    #crop-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
+    .crop-modal-content {
+      width: 90vw;
+      max-width: 900px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .crop-container {
+      width: 100%;
+      max-height: 65vh;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #111;
+    }
+    .crop-container img {
+      max-width: 100%;
+      display: block;
+    }
+    .crop-toolbar {
+      display: flex;
+      gap: 0.5em;
+      margin-top: 1em;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .crop-toolbar button {
+      padding: 0.5em 1em;
+      border: none;
+      border-radius: 6px;
+      background: #333;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.95em;
+      font-family: inherit;
+    }
+    .crop-toolbar button:hover {
+      background: #555;
+    }
+    .crop-toolbar .crop-save {
+      background: #b800ff;
+    }
+    .crop-toolbar .crop-save:hover {
+      background: #9500d1;
+    }
+    .crop-toolbar .crop-cancel {
+      background: #ff2244;
+    }
+    .crop-toolbar .crop-cancel:hover {
+      background: #cc1133;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -32,9 +148,30 @@
       <h1>Admin - Gérer les événements</h1>
       <div id="admin-list"></div>
     </div>
+    <div id="crop-modal">
+      <div class="crop-modal-content">
+        <div class="crop-container">
+          <img id="crop-image" src="" alt="Recadrer">
+        </div>
+        <div class="crop-toolbar">
+          <button onclick="cropperInstance && cropperInstance.rotate(-90)" title="Rotation gauche">↺ 90°</button>
+          <button onclick="cropperInstance && cropperInstance.rotate(90)" title="Rotation droite">↻ 90°</button>
+          <button onclick="cropFlipH()" title="Miroir horizontal">↔ Miroir H</button>
+          <button onclick="cropFlipV()" title="Miroir vertical">↕ Miroir V</button>
+          <button onclick="cropperInstance && cropperInstance.setAspectRatio(NaN)">Libre</button>
+          <button onclick="cropperInstance && cropperInstance.setAspectRatio(1)">1:1</button>
+          <button onclick="cropperInstance && cropperInstance.setAspectRatio(4/3)">4:3</button>
+          <button onclick="cropperInstance && cropperInstance.setAspectRatio(16/9)">16:9</button>
+          <button onclick="cropperInstance && cropperInstance.reset()">Reset</button>
+          <button class="crop-save" onclick="saveCrop()">Sauvegarder</button>
+          <button class="crop-cancel" onclick="closeCropModal()">Annuler</button>
+        </div>
+      </div>
+    </div>
   </main>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
   <script src="firebase-config.js"></script>
   <script>
     const ADMIN_PW_HASH = '5f4dcc3b5aa765d61d8327deb882cf99'; // not used, simple check
@@ -70,6 +207,18 @@
             <p>${ev.place || ''} — ${ev.address || ''}</p>
             <p>${ev.date || ''} ${ev.time || ''}</p>
             <p>${ev.description || ''}</p>
+          </div>
+          <div class="admin-photo-section">
+            ${ev.photo
+              ? (ev.photo.startsWith('data:video/')
+                ? `<video src="${ev.photo}" class="admin-photo-preview" controls></video>`
+                : `<img src="${ev.photo}" class="admin-photo-preview">`)
+              : `<div class="admin-no-photo">Pas de photo</div>`}
+            <div class="admin-photo-controls">
+              <button onclick="replacePhoto(${i})">${ev.photo ? 'Remplacer' : 'Ajouter photo'}</button>
+              ${ev.photo && !ev.photo.startsWith('data:video/') ? `<button onclick="openCropModal(${i})">Recadrer</button>` : ''}
+              ${ev.photo ? `<button class="photo-delete" onclick="deletePhoto(${i})">Supprimer photo</button>` : ''}
+            </div>
           </div>
           <div class="admin-actions">
             <button onclick="editEvent(${i})">Modifier</button>
@@ -115,6 +264,91 @@
         address: document.getElementById('edit-address-' + i).value.trim(),
         description: document.getElementById('edit-desc-' + i).value.trim()
       });
+      render();
+    }
+
+    // --- Photo management ---
+    let cropperInstance = null;
+    let cropEventIndex = null;
+
+    function readFileAsDataURL(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function replacePhoto(i) {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*,video/*,.gif';
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        let photoData;
+        if (file.type.startsWith('video/')) {
+          photoData = await readFileAsDataURL(file);
+        } else {
+          photoData = await compressImage(file);
+        }
+        await updateEventInDB(allEvents[i].id, { photo: photoData });
+        render();
+      };
+      input.click();
+    }
+
+    function openCropModal(i) {
+      cropEventIndex = i;
+      const modal = document.getElementById('crop-modal');
+      const img = document.getElementById('crop-image');
+      img.src = allEvents[i].photo;
+      modal.style.display = 'flex';
+      img.onload = () => {
+        if (cropperInstance) cropperInstance.destroy();
+        cropperInstance = new Cropper(img, {
+          viewMode: 1,
+          autoCropArea: 1,
+          responsive: true,
+          background: true,
+        });
+      };
+    }
+
+    function closeCropModal() {
+      const modal = document.getElementById('crop-modal');
+      modal.style.display = 'none';
+      if (cropperInstance) {
+        cropperInstance.destroy();
+        cropperInstance = null;
+      }
+      cropEventIndex = null;
+    }
+
+    function cropFlipH() {
+      if (!cropperInstance) return;
+      const d = cropperInstance.getData();
+      cropperInstance.scaleX(d.scaleX === -1 ? 1 : -1);
+    }
+
+    function cropFlipV() {
+      if (!cropperInstance) return;
+      const d = cropperInstance.getData();
+      cropperInstance.scaleY(d.scaleY === -1 ? 1 : -1);
+    }
+
+    async function saveCrop() {
+      if (!cropperInstance || cropEventIndex === null) return;
+      const canvas = cropperInstance.getCroppedCanvas({ maxWidth: 1600, maxHeight: 1600 });
+      const croppedData = canvas.toDataURL('image/jpeg', 0.8);
+      await updateEventInDB(allEvents[cropEventIndex].id, { photo: croppedData });
+      closeCropModal();
+      render();
+    }
+
+    async function deletePhoto(i) {
+      if (!confirm('Supprimer la photo de cet événement ?')) return;
+      await updateEventInDB(allEvents[i].id, { photo: firebase.firestore.FieldValue.delete() });
       render();
     }
 
